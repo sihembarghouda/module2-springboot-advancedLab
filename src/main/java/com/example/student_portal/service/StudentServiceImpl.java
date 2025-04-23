@@ -3,12 +3,9 @@ package com.example.student_portal.service;
 import com.example.student_portal.model.Student;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 @Service
 public class StudentServiceImpl implements StudentService {
@@ -54,5 +51,38 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public void deleteStudent(Long id) {
         studentDb.remove(id);
+    }
+
+    @Override
+    public List<Student> searchStudents(String keyword) {
+        String keywordLower = keyword.toLowerCase();
+        return studentDb.values().stream()
+                .filter(student -> student.getName().toLowerCase().contains(keywordLower) ||
+                        student.getEmail().toLowerCase().contains(keywordLower) ||
+                        student.getCourse().toLowerCase().contains(keywordLower) ||
+                        student.getStudentId().toLowerCase().contains(keywordLower))
+                .collect(Collectors.toList());
+    }
+
+
+
+    @Override
+    public List<Student> sortStudents(List<Student> students, String field, String direction) {
+        Comparator<Student> comparator = switch (field) {
+            case "name" -> Comparator.comparing(Student::getName);
+            case "age" -> Comparator.comparing(Student::getAge);
+            case "email" -> Comparator.comparing(Student::getEmail);
+            case "course" -> Comparator.comparing(Student::getCourse);
+            case "studentId" -> Comparator.comparing(Student::getStudentId);
+            default -> Comparator.comparing(Student::getId);
+        };
+
+        if ("desc".equalsIgnoreCase(direction)) {
+            comparator = comparator.reversed();
+        }
+
+        return students.stream()
+                .sorted(comparator)
+                .collect(Collectors.toList());
     }
 }

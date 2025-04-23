@@ -9,4 +9,7 @@ public interface StudentService {
     Optional<Student> getStudentById(Long id);
     Student saveStudent(Student student);
     void deleteStudent(Long id);
+
+    List<Student> searchStudents(String keyword);
+    List<Student> sortStudents(List<Student> students, String field, String direction);
 }
